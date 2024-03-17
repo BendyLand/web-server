@@ -7,10 +7,10 @@ import (
 )
 
 func main() {
-    todo.Greet()
+	todo.Greet()
 
 	var todos todo.TodoList
-    todos.Loop()
+	todos.Loop()
 }
 
 func startServer() {

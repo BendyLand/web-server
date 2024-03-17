@@ -1,17 +1,18 @@
 package todo
 
 import (
-	"fmt"
-	"strconv"
 	"bufio"
+	"fmt"
 	"os"
+	"strconv"
 )
 
 type Task string
 type TodoList []Task
 
 func (todos *TodoList) Loop() {
-	Loop: for {
+Loop:
+	for {
 		var input string
 		fmt.Printf("\nEnter a command or type `help`:\n")
 		fmt.Scan(&input)
@@ -43,9 +44,11 @@ func (todos *TodoList) RemoveTask() {
 	id := todos.getId()
 	var newTodoList []Task
 	for i, todo := range *todos {
-		if i != id {
-			newTodoList = append(newTodoList, todo)
+		if i == id {
+			fmt.Println("Task deleted successfully!")
+			continue
 		}
+		newTodoList = append(newTodoList, todo)
 	}
 	*todos = newTodoList
 }
@@ -68,11 +71,13 @@ func (todos *TodoList) CreateTask() {
 	}
 	newTask := Task(body)
 	*todos = append(*todos, newTask)
+	fmt.Println("Task saved successfully!")
 }
 
 func (todos *TodoList) getId() int {
 	length := len(*todos)
-	Loop: for {
+Loop:
+	for {
 		var input string
 		fmt.Scanln(&input)
 		id, err := strconv.Atoi(input)
@@ -84,6 +89,6 @@ func (todos *TodoList) getId() int {
 			fmt.Printf("\nInvalid input. Please enter a number under: %d\n", len(*todos)+1)
 			continue Loop
 		}
-		return id-1
+		return id - 1
 	}
 }
