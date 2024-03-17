@@ -1,27 +1,41 @@
 package main
 
 import (
-    "os"
-    "log"
+	"bufio"
 	"fmt"
-    "bufio"
 	"golang/handlers"
+	"log"
 	"net/http"
+	"os"
+	"strconv"
 )
 
 func main() {
 	greet()
 	taskManager := handlers.NewTaskManager()
 	taskManager.CreateDbTable()
-	taskManager.AddTask("This is a test")
-	taskManager.AddTask("This is another test")
-	taskManager.AddTask("This is a third test")
-	taskManager.AddTask("This is a fourth test")
-    taskManager.DeleteTask(2)
+	addTask(taskManager)
+	addTask(taskManager)
+	addTask(taskManager)
+    deleteTask(taskManager)
     taskManager.Shutdown()
 }
 
+
+func deleteTask(m *handlers.TaskManager) {
+    var input string
+    fmt.Println("Which task would you like to delete?")
+    m.DisplayTasks()
+    fmt.Scan(&input)
+    id, err := strconv.Atoi(input)
+    if err != nil {
+        log.Fatal("Error getting input: ", err)
+    }
+    m.DeleteTask(id)
+}
+
 func addTask(m *handlers.TaskManager) {
+    fmt.Println("Please enter the text for your task:")
     reader := bufio.NewReader(os.Stdin)
     input, err := reader.ReadString('\n')
     if err != nil {

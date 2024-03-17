@@ -13,8 +13,26 @@ import (
 type TaskManager struct {
 	mutex  sync.Mutex
 	todos  todo.TodoList
-	nextId int
 	db *sql.DB
+}
+
+func (m *TaskManager) DisplayTasks() {
+	fmt.Println("Todo List:")
+	res, err := m.db.Query("SELECT * FROM tasks;")
+	defer res.Close()
+	if err != nil {
+		log.Fatal("There was a problem retrieving your tasks")
+	}
+	for res.Next() {
+		var id int
+		var body string
+		err := res.Scan(&id, &body)
+		if err != nil {
+			fmt.Println("There was a problem getting this task")
+			continue
+		}
+		fmt.Printf("%d.) %s", id, body) // each body variable ends in '\n'
+	}
 }
 
 func (m *TaskManager) DeleteTask(id int) {
@@ -24,17 +42,11 @@ func (m *TaskManager) DeleteTask(id int) {
 	if err != nil {
 		log.Fatal("There was a problem preparing your query")
 	}
-	res, err := stmt.Exec(id)
-	if err != nil {
+	_, err1 := stmt.Exec(id)
+	if err1 != nil {
 		log.Fatal("There was a problem executing your query")
 	}
-	affected, err := res.RowsAffected()
-	if err == nil {
-		fmt.Println("Task deleted successfully!")
-		fmt.Printf("%d rows affected\n", affected)
-		return
-	} 
-	log.Fatal("There was a problem deleting the task")
+	fmt.Println("Task deleted successfully!")
 }
 
 func (m *TaskManager) Shutdown() {
@@ -50,10 +62,7 @@ func (m *TaskManager) Shutdown() {
 func (m *TaskManager) AddTask(body string) {
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
-	task := todo.Task{
-		Id:   m.nextId,
-		Body: body,
-	}
+	task := todo.Task(body)
 	m.todos = append(m.todos, task)
 	m.updateDatabase()
 }
@@ -77,14 +86,13 @@ func NewTaskManager() *TaskManager {
 	newDb := initializeDb()
 	return &TaskManager{
 		todos:  make(todo.TodoList, 0),
-		nextId: 0, 
 		db: newDb,
 	}
 }
 
-func (m *TaskManager) nextTask() string {
+func (m *TaskManager) nextTask() todo.Task {
 	i := len(m.todos) - 1
-	return m.todos[i].Body
+	return m.todos[i]
 }
 
 func initializeDb() *sql.DB {
