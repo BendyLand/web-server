@@ -35,12 +35,18 @@ func (m *TaskManager) AddTask(body string) {
 		Body: body,
 	}
 	m.todos = append(m.todos, task)
-	m.nextId++ // increment for the next task
 	m.updateDatabase()
 }
 
 func (m *TaskManager) CreateDbTable() {
-	_, err2 := m.db.Exec("CREATE TABLE IF NOT EXISTS tasks(id INTEGER PRIMARY KEY AUTOINCREMENT, body TEXT)")
+	_, err2 := m.db.Exec(
+		`CREATE TABLE 
+			IF NOT EXISTS tasks(
+				id INTEGER PRIMARY KEY AUTOINCREMENT, 
+				body TEXT
+			);
+		`,
+	)
 	if err2 != nil {
 		log.Fatal("There was a problem executing your query: ", err2)
 	}
@@ -51,7 +57,7 @@ func NewTaskManager() *TaskManager {
 	newDb := initializeDb()
 	return &TaskManager{
 		todos:  make(todo.TodoList, 0),
-		nextId: 0, // ids will start at 1
+		nextId: 0, 
 		db: newDb,
 	}
 }
@@ -69,14 +75,14 @@ func initializeDb() *sql.DB {
 	return db
 }
 
-func (manager *TaskManager) updateDatabase() {
-	db := initializeDb()
-	stmt, err := db.Prepare("INSERT INTO tasks VALUES (?, ?)")
+func (m *TaskManager) updateDatabase() {
+	stmt, err := m.db.Prepare("INSERT INTO tasks(body) VALUES (?)")
 	if err != nil {
 		log.Fatal("There was a problem preparing your query: ", err)
 	}
 	defer stmt.Close()
-	res, err := stmt.Exec(manager.nextId, manager.nextTask())
+
+	res, err := stmt.Exec(m.nextTask())
 	if err != nil {
 		log.Fatal("There was a problem executing your query: ", err)
 	}
