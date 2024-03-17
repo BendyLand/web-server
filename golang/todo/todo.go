@@ -1,7 +1,5 @@
 package todo
 
-type Task string 
+type Task string
 
 type TodoList []Task
-
-

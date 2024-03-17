@@ -11,9 +11,9 @@ import (
 )
 
 type TaskManager struct {
-	mutex  sync.Mutex
-	todos  todo.TodoList
-	db *sql.DB
+	mutex sync.Mutex
+	todos todo.TodoList
+	db    *sql.DB
 }
 
 func (m *TaskManager) DisplayTasks() {
@@ -31,7 +31,7 @@ func (m *TaskManager) DisplayTasks() {
 			fmt.Println("There was a problem getting this task")
 			continue
 		}
-		fmt.Printf("%d.) %s", id, body) // each body variable ends in '\n'
+		fmt.Printf("%d.) %s", id, body) // each body variable already ends in '\n'
 	}
 }
 
@@ -85,8 +85,8 @@ func (m *TaskManager) CreateDbTable() {
 func NewTaskManager() *TaskManager {
 	newDb := initializeDb()
 	return &TaskManager{
-		todos:  make(todo.TodoList, 0),
-		db: newDb,
+		todos: make(todo.TodoList, 0),
+		db:    newDb,
 	}
 }
 
