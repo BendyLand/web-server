@@ -17,6 +17,26 @@ type TaskManager struct {
 	db *sql.DB
 }
 
+func (m *TaskManager) DeleteTask(id int) {
+	m.mutex.Lock()
+	defer m.mutex.Unlock()
+	stmt, err := m.db.Prepare("DELETE FROM tasks WHERE id = ?")
+	if err != nil {
+		log.Fatal("There was a problem preparing your query")
+	}
+	res, err := stmt.Exec(id)
+	if err != nil {
+		log.Fatal("There was a problem executing your query")
+	}
+	affected, err := res.RowsAffected()
+	if err == nil {
+		fmt.Println("Task deleted successfully!")
+		fmt.Printf("%d rows affected\n", affected)
+		return
+	} 
+	log.Fatal("There was a problem deleting the task")
+}
+
 func (m *TaskManager) Shutdown() {
 	if m.db != nil {
 		err := m.db.Close()
@@ -90,5 +110,5 @@ func (m *TaskManager) updateDatabase() {
 	if err != nil {
 		log.Fatal("There was a problem getting the rows affected: ", err)
 	}
-	fmt.Printf("%d rows affected\n\n", affected)
+	fmt.Printf("%d rows affected\n", affected)
 }

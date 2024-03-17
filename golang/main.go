@@ -17,6 +17,7 @@ func main() {
 	taskManager.AddTask("This is another test")
 	taskManager.AddTask("This is a third test")
 	taskManager.AddTask("This is a fourth test")
+    taskManager.DeleteTask(2)
     taskManager.Shutdown()
 }
 
