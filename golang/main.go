@@ -7,15 +7,10 @@ import (
 )
 
 func main() {
+    todo.Greet()
+
 	var todos todo.TodoList
-	todos.CreateTask("This is my first task")
-	todos.CreateTask("This is my second task")
-	todos.CreateTask("This is my third task")
-	todos.CreateTask("This is my fourth task")
-	todos.CreateTask("This is my fifth task")
-	todos.DisplayTodoList()
-	todos.RemoveTask()
-	todos.DisplayTodoList()
+    todos.Loop()
 }
 
 func startServer() {
