@@ -13,7 +13,7 @@ type TodoList []Task
 func (todos *TodoList) Loop() {
 	var input string
 	fmt.Printf("\nEnter a command or type `help`:\n")
-	fmt.Scanln(&input)
+	fmt.Scan(&input)
 	switch input {
 	case "add":
 		todos.CreateTask()
