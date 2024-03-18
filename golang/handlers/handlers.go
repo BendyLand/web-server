@@ -96,7 +96,7 @@ func (m *TaskManager) nextTask() todo.Task {
 }
 
 func initializeDb() *sql.DB {
-	db, err := sql.Open("sqlite3", "./todos.db")
+	db, err := sql.Open("sqlite3", "./todo.db")
 	if err != nil {
 		log.Fatal("There was a problem opening the database: ", err)
 	}

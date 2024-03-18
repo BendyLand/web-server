@@ -9,9 +9,6 @@ func main() {
 	actions.Greet()
 	taskManager := handlers.NewTaskManager()
 	taskManager.CreateDbTable()
-	actions.AddTask(taskManager)
-	actions.AddTask(taskManager)
-	actions.AddTask(taskManager)
-	actions.DeleteTask(taskManager)
+	actions.Loop(taskManager)
 	taskManager.Shutdown()
 }

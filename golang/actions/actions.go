@@ -10,6 +10,33 @@ import (
 	"strconv"
 )
 
+func Loop(m *handlers.TaskManager) {
+	reader := bufio.NewReader(os.Stdin)
+Loop:
+	for {
+		fmt.Println("Enter a command or type `help`:")
+		action, err := reader.ReadString('\n')
+		if err != nil {
+			log.Fatal("Something went wrong...")
+		}
+		switch action {
+		case "add\n":
+			AddTask(m)
+		case "view\n":
+			m.DisplayTasks()
+		case "delete\n":
+			DeleteTask(m)
+		case "exit\n":
+			fmt.Println("Shutting down Todo List...")
+			break Loop
+		default:
+			fmt.Println(
+				"HELP COMMANDS:\nThe available commands are:\nadd\nview\ndelete\nexit\nhelp ",
+			)
+		}
+	}
+}
+
 func DeleteTask(m *handlers.TaskManager) {
 	var input string
 	fmt.Println("Which task would you like to delete?")
