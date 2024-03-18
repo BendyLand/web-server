@@ -3,7 +3,6 @@ package handlers
 import (
 	"database/sql"
 	"fmt"
-	"golang/todo"
 	"log"
 	"sync"
 
@@ -12,7 +11,6 @@ import (
 
 type TaskManager struct {
 	mutex sync.Mutex
-	todos todo.TodoList
 	db    *sql.DB
 }
 
@@ -31,7 +29,7 @@ func (m *TaskManager) DisplayTasks() {
 			fmt.Println("There was a problem getting this task")
 			continue
 		}
-		fmt.Printf("%d.) %s", id, body) // each body variable already ends in '\n'
+		fmt.Printf("%d.) %s", id, body) // each `body` variable already ends in '\n'
 	}
 }
 
@@ -40,11 +38,13 @@ func (m *TaskManager) DeleteTask(id int) {
 	defer m.mutex.Unlock()
 	stmt, err := m.db.Prepare("DELETE FROM tasks WHERE id = ?")
 	if err != nil {
-		log.Fatal("There was a problem preparing your query")
+		fmt.Println("There was a problem preparing your query")
+		return
 	}
 	_, err1 := stmt.Exec(id)
 	if err1 != nil {
-		log.Fatal("There was a problem executing your query")
+		fmt.Println("There was a problem executing your query")
+		return
 	}
 	fmt.Println("Task deleted successfully!")
 }
@@ -53,7 +53,8 @@ func (m *TaskManager) Shutdown() {
 	if m.db != nil {
 		err := m.db.Close()
 		if err != nil {
-			log.Fatal("There was a problem closing the database connection: ", err)
+			fmt.Println("There was a problem closing the database connection")
+			return
 		}
 		fmt.Println("Database connection closed successfully!")
 	}
@@ -62,13 +63,11 @@ func (m *TaskManager) Shutdown() {
 func (m *TaskManager) AddTask(body string) {
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
-	task := todo.Task(body)
-	m.todos = append(m.todos, task)
-	m.updateDatabase()
+	m.updateDatabase(body)
 }
 
 func (m *TaskManager) CreateDbTable() {
-	_, err2 := m.db.Exec(
+	_, err := m.db.Exec(
 		`CREATE TABLE 
 			IF NOT EXISTS tasks(
 				id INTEGER PRIMARY KEY AUTOINCREMENT, 
@@ -76,8 +75,9 @@ func (m *TaskManager) CreateDbTable() {
 			);
 		`,
 	)
-	if err2 != nil {
-		log.Fatal("There was a problem executing your query: ", err2)
+	if err != nil {
+		fmt.Println("There was a problem executing your query:", err)
+		return
 	}
 	fmt.Println("Table created successfully!")
 }
@@ -85,14 +85,8 @@ func (m *TaskManager) CreateDbTable() {
 func NewTaskManager() *TaskManager {
 	newDb := initializeDb()
 	return &TaskManager{
-		todos: make(todo.TodoList, 0),
-		db:    newDb,
+		db: newDb,
 	}
-}
-
-func (m *TaskManager) nextTask() todo.Task {
-	i := len(m.todos) - 1
-	return m.todos[i]
 }
 
 func initializeDb() *sql.DB {
@@ -103,20 +97,23 @@ func initializeDb() *sql.DB {
 	return db
 }
 
-func (m *TaskManager) updateDatabase() {
+func (m *TaskManager) updateDatabase(taskBody string) {
 	stmt, err := m.db.Prepare("INSERT INTO tasks(body) VALUES (?)")
 	if err != nil {
-		log.Fatal("There was a problem preparing your query: ", err)
+		fmt.Println("There was a problem preparing your query:", err)
+		return
 	}
 	defer stmt.Close()
 
-	res, err := stmt.Exec(m.nextTask())
+	res, err := stmt.Exec(taskBody)
 	if err != nil {
-		log.Fatal("There was a problem executing your query: ", err)
+		fmt.Println("There was a problem executing your query:", err)
+		return
 	}
 	affected, err := res.RowsAffected()
 	if err != nil {
-		log.Fatal("There was a problem getting the rows affected: ", err)
+		fmt.Println("There was a problem getting the rows affected:", err)
+		return
 	}
 	fmt.Printf("%d rows affected\n", affected)
 }
